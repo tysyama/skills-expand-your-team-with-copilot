@@ -304,6 +304,42 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  function getActivityShareData(activityName, details) {
+    const shareUrl = `${window.location.origin}${window.location.pathname}`;
+    const shareText = `Check out ${activityName} at Mergington High School: ${details.description}`;
+
+    return {
+      shareUrl,
+      shareText,
+      shareMessage: `${shareText} ${shareUrl}`,
+    };
+  }
+
+  async function copyActivityShare(activityName, details) {
+    const { shareMessage } = getActivityShareData(activityName, details);
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareMessage);
+      } else {
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = shareMessage;
+        tempTextArea.setAttribute("readonly", "");
+        tempTextArea.style.position = "absolute";
+        tempTextArea.style.left = "-9999px";
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempTextArea);
+      }
+
+      showMessage(`Share link for "${activityName}" copied.`, "success");
+    } catch (error) {
+      console.error("Error copying share link:", error);
+      showMessage("Could not copy share link. Please try again.", "error");
+    }
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -498,6 +534,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const { shareUrl, shareText } = getActivityShareData(name, details);
+    const encodedShareUrl = encodeURIComponent(shareUrl);
+    const encodedShareText = encodeURIComponent(shareText);
 
     // Create activity tag
     const tagHtml = `
@@ -528,6 +567,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      <div class="share-actions" aria-label="Share activity">
+        <span class="share-label">Share:</span>
+        <a
+          class="share-button share-link"
+          href="https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share ${name} on WhatsApp"
+        >
+          WhatsApp
+        </a>
+        <a
+          class="share-button share-link"
+          href="https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedShareUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share ${name} on X"
+        >
+          X
+        </a>
+        <button type="button" class="share-button copy-share-button" aria-label="Copy share link for ${name}">
+          Copy Link
+        </button>
+      </div>
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -586,6 +649,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    const copyShareButton = activityCard.querySelector(".copy-share-button");
+    copyShareButton.addEventListener("click", () => {
+      copyActivityShare(name, details);
+    });
 
     activitiesList.appendChild(activityCard);
   }

@@ -245,6 +245,38 @@ section h3 {
   border-top: 1px solid var(--border-light);
 }
 
+.share-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.share-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.share-actions .share-button {
+  font-size: 0.75rem;
+  border-radius: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  color: var(--primary);
+  text-decoration: none;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.share-actions .share-button:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-text);
+  border-color: var(--primary-light);
+}
+
 .participants-list h5 {
   color: var(--primary);
   margin-bottom: 5px;
